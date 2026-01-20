@@ -81,7 +81,8 @@ On Windows, Python extensions may be hidden (e.g., `cfg` → `cfg.py`).
 - `train.py` — Training entry point (typical: freeze backbone → train only adapter parameters).
 - `val.py` — Validation/evaluation entry point (segmentation metrics + optional compute metrics).
 - `MedSAM2D_Tumours.ipynb` — Notebook for experiments, debugging, visualization, and analysis.
-- `Abdominal_Liver_sam_128.pth` — Checkpoint/weights used in experiments (see checkpoint notes).
+- `Abdominal_Liver_sam_128.pth` — Checkpoint/weights used in experiments (see checkpoint notes).  
+  Download: [Abdominal_Liver_sam_128.pth (Google Drive)](https://drive.google.com/file/d/1qf-GfeDKsbT0e9vwzu1_Fv9anRotI3HW/view?usp=sharing)
 
 ---
 
