@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this research snapshot, please cite the accompanying paper."
+title: "PEFT-SAM liver CT research snapshot"
+type: software
+authors:
+  - family-names: Mojtahedi
+    given-names: Ramtin
+repository-code: "https://github.com/Ramtin-Mojtahedi/peft-sam-liver-ct"
+keywords:
+  - liver tumor segmentation
+  - computed tomography
+  - parameter-efficient fine-tuning
+  - Segment Anything Model
+  - medical imaging
+preferred-citation:
+  type: conference-paper
+  title: "Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in CT"
+  authors:
+    - family-names: Mojtahedi
+      given-names: Ramtin
+    - family-names: Hamghalam
+      given-names: Mohammad
+    - family-names: Peoples
+      given-names: "Jacob J."
+    - family-names: Do
+      given-names: "Richard K. G."
+    - family-names: Simpson
+      given-names: "Amber L."
+  collection-title: "Medical Imaging 2026: Computer-Aided Diagnosis"
+  volume: 13926
+  start: 260
+  end: 268
+  year: 2026
+  doi: "10.1117/12.3087835"
+  url: "https://doi.org/10.1117/12.3087835"
