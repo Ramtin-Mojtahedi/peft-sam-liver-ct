@@ -1,302 +1,123 @@
-# DiSCo / PEFT Adapters for SAM on CT Liver Tumor Segmentation
+# Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in CT
 
-PEFT adapters (Conv-Adapter / LoRA / QLoRA / DiSCo) for **SAM/MedSAM-style** CT liver tumor segmentation with prompt-driven evaluation and accuracy–efficiency benchmarking.
+[![DOI](https://img.shields.io/badge/DOI-10.1117%2F12.3087835-blue)](https://doi.org/10.1117/12.3087835)
+![Status](https://img.shields.io/badge/status-research%20snapshot-6c757d)
+![License](https://img.shields.io/badge/license-none%20declared-lightgrey)
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.x-orange)
-![Status](https://img.shields.io/badge/Status-Research%20Code-6c757d)
-![License](https://img.shields.io/badge/License-Not%20specified-lightgrey)
+Research code associated with:
 
----
+> Ramtin Mojtahedi, Mohammad Hamghalam, Jacob J. Peoples, Richard K. G. Do, and Amber L. Simpson. “Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in CT.” *Medical Imaging 2026: Computer-Aided Diagnosis*, Proceedings of SPIE, vol. 13926, pp. 260–268, article 1392612, 2026. [https://doi.org/10.1117/12.3087835](https://doi.org/10.1117/12.3087835)
 
-## GitHub “About” (copy/paste)
+## Repository status
 
-PEFT adapters (Conv-Adapter / LoRA / QLoRA / DiSCo) for SAM-style CT liver tumor segmentation with prompt-driven evaluation and accuracy–efficiency benchmarking.
+> **Important:** this repository is an archival research snapshot. It is **not a standalone or turnkey implementation**, and it cannot reproduce the paper from a fresh clone.
 
----
+The snapshot preserves selected experiment code for adapting SAM/MedSAM-style segmentation models to CT liver-tumor segmentation. It contains configuration, training, validation, adapter, metric, and notebook code, but it does not contain the complete runtime used in the study.
 
-## Discoverability (GitHub topics + hashtags)
+Specifically:
 
-**GitHub Topics (recommended):** add these in **GitHub → Settings → Topics**  
-`medical-imaging, segmentation, liver, tumor-segmentation, ct, computed-tomography, foundation-model, segment-anything, sam, medsam, peft, adapters, lora, qlora, pytorch, parameter-efficient-finetuning, promptable-segmentation`
+- the in-house colorectal liver metastasis CT images, tumor masks, patient-level splits, and clinical metadata are not included;
+- the dataset loader, model implementations, runtime settings module, and one imported SSIM module are absent;
+- SAM/MedSAM checkpoints and trained adapter checkpoints are not versioned here;
+- there is no dependency lockfile, requirements file, container, or tested environment specification;
+- several source files and notebook cells contain workstation-specific absolute paths; and
+- no software license has been declared.
 
-**Hashtags (optional for posts):**  
-`#medicalimaging #segmentation #CT #liver #tumorsegmentation #SAM #MedSAM #PEFT #LoRA #QLoRA #PyTorch`
+Treat this repository as a transparent record of selected research code, not as a validated clinical product or a fully reproducible package.
 
----
+## What is included
 
-## Paper
+| Path | Contents |
+|---|---|
+| `cfg.py` | Command-line configuration for model, adapter, optimization, prompts, cross-validation, and data paths. |
+| `train.py` | Training and cross-validation orchestration, checkpointing, result export, and experiment summaries. |
+| `val.py` | Checkpoint-loading and validation entry point. |
+| `function.py` | SAM-style training and validation functions, prompting, loss wiring, and evaluation logic. |
+| `utils.py` | Adapter implementations, model assembly helpers, metrics, logging, plotting, checkpoint utilities, and MONAI helpers. |
+| `precpt.py` | VGG/Lucent-based perceptual-loss helper. Despite its filename, it is not a complete dataset-preprocessing pipeline. |
+| `MedSAM2D_Tumours.ipynb` | Historical data-preparation, experiment-launch, evaluation, aggregation, and visualization notebook with retained cell outputs. |
+| `CITATION.cff` | Machine-readable citation metadata for the accompanying paper. |
 
-**Parameter-Efficient Fine-Tuning of Foundation Models for Liver Tumor Segmentation in CT**  
-Ramtin Mojtahedi, Mohammad Hamghalam, Jacob J. Peoples, Richard K. G. Do, Amber L. Simpson
+## Missing runtime components
 
-This repository adapts a **frozen SAM/MedSAM-style backbone** to CT liver tumor segmentation using **parameter-efficient fine-tuning (PEFT)**. Only lightweight adapter parameters are trained, enabling fast, low-memory adaptation and prompt-driven workflows.
+The following imports are referenced by the committed source but are not present in this snapshot:
 
-> **Dataset note:** The in-house CRLM CT dataset used in the paper is **not included**.  
-> You can run the same pipeline on your own dataset by configuring paths in `cfg.py`.
+| Referenced component | Used by | Why it matters |
+|---|---|---|
+| `dataset.py` / `dataset` | `train.py`, `val.py`, `precpt.py` | Defines dataset classes and `get_dataloader`; without it, the input schema and split logic are unavailable. |
+| `conf.py` / `conf.settings` | `train.py`, `val.py`, `function.py` | Supplies runtime settings such as timestamps and output conventions. |
+| `models/` | `function.py`, `utils.py` | Supplies SAM, EfficientSAM, and MobileSAM model code and transforms. |
+| `pytorch_ssim` | `function.py` | Imported by the loss/evaluation code but neither included nor pinned as a dependency. |
 
----
+The code also imports third-party packages including PyTorch, torchvision, MONAI, Transformers, scikit-learn, scikit-image, tensorboardX, einops, Pillow, NumPy, Matplotlib, seaborn, tqdm, python-dateutil, and Lucent. Their exact versions are not recorded.
 
-## What’s included
+Because `dataset.py` is missing, a reliable input-directory contract cannot be inferred from this repository alone. Do not assume that a generic `images/` and `labels/` layout will reproduce the study.
 
-- PEFT training with a **frozen foundation segmentation backbone**
-- Adapter implementations used in the study (**Conv-Adapter**, **LoRA**, **QLoRA**, **DiSCo**)
-- Training + validation entry points
-- One analysis notebook for tumor experiments
+## Hard-coded environment assumptions
 
-```mermaid
-flowchart LR
-  A["CT Images + Tumor Masks"] --> B["Preprocess<br/>precpt.py"]
-  B --> C["Train adapters<br/>train.py"]
-  C --> D["Validate / benchmark<br/>val.py"]
-  D --> E["Prompted inference<br/>points / boxes<br/>config-driven"]
-```
+Before attempting any reconstruction, review and replace the following:
 
----
+- `train.py` writes experiments beneath `/mnt/largedrive1/rmojtahedi/medsam_adapter`.
+- `MedSAM2D_Tumours.ipynb` contains numerous `/mnt/largedrive0/...`, `/mnt/largedrive1/...`, and `/home/rmojtahedi/...` paths for private data, checkpoints, cached weights, and results.
+- `cfg.py` defaults to `../data` and `sam_vit_b_01ec64.pth`; neither target is included.
+- `utils.py` contains a historical example checkpoint path under `./logs/siren_train_init_2022_08_19_21_00_16/...`.
+- Retained notebook outputs refer to experiment directories and checkpoints that are not part of this repository.
 
-## Repository contents
+These paths document the original workstation layout; they are not portable configuration defaults.
 
-On Windows, Python extensions may be hidden (e.g., `cfg` → `cfg.py`).
-
-```text
-.
-├── Abdominal_Liver_sam_128.pth
-├── cfg.py
-├── function.py
-├── MedSAM2D_Tumours.ipynb
-├── precpt.py
-├── train.py
-├── utils.py
-└── val.py
-```
-
----
-
-## File guide
-
-- `cfg.py` — Central configuration (paths, hyperparameters, adapter selection, prompt/eval settings).
-- `function.py` — Core model + training/evaluation logic (adapters, prompting utilities, loss/metrics wiring).
-- `utils.py` — Shared utilities (I/O, transforms, logging, metrics helpers, timing, etc.).
-- `precpt.py` — Preprocessing script (raw data → training/evaluation format).
-- `train.py` — Training entry point (typical: freeze backbone → train only adapter parameters).
-- `val.py` — Validation/evaluation entry point (segmentation metrics + optional compute metrics).
-- `MedSAM2D_Tumours.ipynb` — Notebook for experiments, debugging, visualization, and analysis.
-- `Abdominal_Liver_sam_128.pth` — Checkpoint/weights used in experiments (see checkpoint notes).  
-  Download: [Abdominal_Liver_sam_128.pth (Google Drive)](https://drive.google.com/file/d/1qf-GfeDKsbT0e9vwzu1_Fv9anRotI3HW/view?usp=sharing)
-
----
-
-## Setup
-
-### 0) Clone
+## Clone for inspection
 
 ```bash
-git clone <YOUR_REPO_URL>
-cd <YOUR_REPO_FOLDER>
+git clone https://github.com/Ramtin-Mojtahedi/peft-sam-liver-ct.git
+cd peft-sam-liver-ct
 ```
 
-### 1) Create a clean environment (recommended)
+A successful clone does not make the training or validation commands runnable. To reconstruct the environment, a researcher would need to:
 
-```bash
-conda create -n disco-peft-sam python=3.10 -y
-conda activate disco-peft-sam
-python -m pip install -U pip
-```
+1. obtain authorized access to the study data, masks, and exact patient-level splits;
+2. restore the missing `dataset`, `conf`, `models`, and `pytorch_ssim` components in versions compatible with this snapshot;
+3. obtain the exact SAM/MedSAM base weights and study checkpoints;
+4. replace every absolute data, checkpoint, cache, and output path;
+5. reconstruct and record a compatible dependency environment; and
+6. verify all configuration values against the paper and original experiment records.
 
-### 2) Install PyTorch
+Until those pieces are restored, `python train.py`, `python val.py`, and the notebook should be expected to fail or to produce non-comparable results.
 
-Install a PyTorch build that matches your system (CPU or CUDA). Example:
+## Data and model availability
 
-```bash
-pip install torch torchvision
-```
+The patient CT data and annotations used in the study are not distributed in this repository. They may be subject to institutional approvals, privacy constraints, and data-use agreements. Do not add identifiable or restricted clinical data to a public fork.
 
-### 3) Install common dependencies
+No base-model or trained-adapter weight file is committed in this snapshot. Any separately obtained weights remain subject to their own terms and provenance requirements.
 
-```bash
-pip install numpy scipy opencv-python scikit-image matplotlib tqdm pyyaml
-```
-
-Optional (for notebooks):
-
-```bash
-pip install notebook ipykernel
-python -m ipykernel install --user --name disco-peft-sam
-```
-
-### 4) Sanity checks (recommended)
-
-From the repo root:
-
-```bash
-python -c "import torch; print('torch:', torch.__version__); print('cuda:', torch.cuda.is_available())"
-python -m compileall .
-```
-
----
-
-## Data expectations
-
-Because datasets differ, the most reliable reference is the dataset-loading logic inside `utils.py` / `function.py` and the path configuration in `cfg.py`.
-
-In general, the pipeline expects paired 2D images and binary tumor masks, with consistent sizing.
-
-Recommended layout:
-
-```text
-data/
-  images/   (CT slices)
-  labels/   (binary masks aligned with images)
-```
-
-Conventions:
-- `images/` and `labels/` contain matching filenames (e.g., `0001.png` ↔ `0001.png`)
-- masks are binary (`0` background, `1` tumor) unless configured otherwise
-- if your loader expects a manifest (JSON/CSV), keep it next to the data and point to it in `cfg.py`
-
----
-
-## Preprocessing
-
-Open `cfg.py` and set:
-- input data paths
-- output directory for preprocessed slices/masks
-- any preprocessing parameters used by your workflow
-
-Run preprocessing:
-
-```bash
-python precpt.py
-```
-
-Typical CT → 2D preprocessing may include:
-- intensity clipping (HU range) and scaling
-- cropping to reduce search space (e.g., liver ROI when available)
-- resizing/export to a fixed resolution suitable for SAM-style backbones
-
----
-
-## Training
-
-Open `cfg.py` and configure:
-- dataset paths
-- output/log directory
-- adapter type (Conv-Adapter / LoRA / QLoRA / DiSCo)
-- training hyperparameters (epochs, lr, batch size, seed)
-- prompt regime settings (if applicable)
-
-Run training:
-
-```bash
-python train.py
-```
-
-Typical outputs:
-- adapter checkpoints
-- training logs and validation summaries
-
----
-
-## Validation / Evaluation
-
-Run evaluation:
-
-```bash
-python val.py
-```
-
-Typical evaluation reports:
-- Dice
-- HD95
-- (optional) compute metrics such as latency / throughput / peak GPU memory, if implemented/enabled
-
-For fair benchmarking across adapters:
-- keep the same input resolution
-- keep batch size and device consistent
-- keep prompt settings consistent
-
----
-
-## Notebook workflow
-
-Use the notebook for interactive experiments and visualization:
-
-- `MedSAM2D_Tumours.ipynb`
-
-Checklist:
-- confirm dataset paths are correct
-- load a few samples and visualize image + mask
-- run a short train/val pass
-- visualize predictions (and prompts if used)
-
----
-
-## Paper snapshot (optional)
-
-Keep short; update to match finalized runs.
-
-| Adapter       | Strength                           | Trade-off                                        |
-|--------------|------------------------------------|--------------------------------------------------|
-| Conv-Adapter  | strong absolute accuracy            | more trainable params than ultra-light methods   |
-| LoRA          | strong accuracy, simple integration | can be heavier depending on rank/insertion sites |
-| QLoRA         | strong efficiency profile           | quantization adds implementation complexity      |
-| DiSCo         | excellent parameter efficiency      | lower absolute accuracy in ultra-low param settings |
-
----
-
-## Checkpoints
-
-`Abdominal_Liver_sam_128.pth` may be large; for public repos, avoid committing large binaries directly to git history.
-
-Recommended options:
-- Git LFS
-- GitHub Releases
-- external storage + checksum (e.g., SHA256)
-
-If private/dataset-specific, keep it local and add it to `.gitignore`.
-
----
-
-## Reproducibility tips
-
-- Use patient-level splits if you have multiple slices per patient/case
-- Fix and log:
-  - random seed(s)
-  - input resolution
-  - adapter type + rank/scaling settings
-  - prompt regime settings
-  - device + batch size
-- Keep evaluation conditions identical across adapters (same resolution, prompts, device)
-
----
+For access questions, consult the paper and contact the authors.
 
 ## Citation
 
-Update venue / DOI / arXiv once finalized:
+If this repository informs your work, cite the accompanying paper:
 
 ```bibtex
-@inproceedings{mojtahedi_peft_sam_liver_ct,
-  title  = {Parameter-Efficient Fine-Tuning of Foundation Models for Liver Tumor Segmentation in CT},
-  author = {Mojtahedi, Ramtin and Hamghalam, Mohammad and Peoples, Jacob J. and Do, Richard K. G. and Simpson, Amber L.},
-  year   = {2026}
+@inproceedings{mojtahedi2026parameter,
+  author    = {Mojtahedi, Ramtin and Hamghalam, Mohammad and Peoples, Jacob J. and Do, Richard K. G. and Simpson, Amber L.},
+  title     = {Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in {CT}},
+  booktitle = {Medical Imaging 2026: Computer-Aided Diagnosis},
+  series    = {Proceedings of SPIE},
+  volume    = {13926},
+  pages     = {260--268},
+  year      = {2026},
+  publisher = {SPIE},
+  doi       = {10.1117/12.3087835},
+  url       = {https://doi.org/10.1117/12.3087835}
 }
 ```
 
----
+GitHub can also expose this citation through `CITATION.cff`.
 
-## Acknowledgments
+## Funding
 
-This work was funded by the National Institutes of Health / National Cancer Institute (R01CA233888, U01CA238444).
+The associated work acknowledges support from the National Institutes of Health / National Cancer Institute under awards R01CA233888 and U01CA238444.
 
----
+## License and reuse
 
-## License
+**No license file or software license grant is included.** The repository’s public visibility does not by itself grant permission to copy, modify, redistribute, or incorporate the code into another project. Unless an exception in applicable law applies, obtain permission from the relevant rights holders before reuse.
 
-No license file is currently included in this repository. If you plan to share or reuse this code publicly, add a `LICENSE` file (e.g., MIT or Apache-2.0) and update the badge at the top.
-
----
-
-## Contact
-
-For questions or issues, please open a GitHub Issue.  
-Correspondence: `ramtinrms@gmail.com`
+For permissions or research questions, contact the authors or open an issue with the repository owner.
