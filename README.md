@@ -8,6 +8,40 @@ Research code associated with:
 
 > Ramtin Mojtahedi, Mohammad Hamghalam, Jacob J. Peoples, Richard K. G. Do, and Amber L. Simpson. “Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in CT.” *Medical Imaging 2026: Computer-Aided Diagnosis*, Proceedings of SPIE, vol. 13926, pp. 260–268, article 1392612, 2026. [https://doi.org/10.1117/12.3087835](https://doi.org/10.1117/12.3087835)
 
+<!-- repository-guide:start -->
+## At a glance
+
+[Paper](https://doi.org/10.1117/12.3087835) · [Code map](#what-is-included) · [Missing components](#missing-runtime-components) · [Environment assumptions](#hard-coded-environment-assumptions) · [Data and weights](#data-and-model-availability) · [`CITATION.cff`](CITATION.cff)
+
+### Dependency evidence
+
+| Area | Packages imported by committed files |
+|---|---|
+| Training and evaluation | `torch`, `torchvision`, `monai`, `numpy`, `scikit-learn`, `scikit-image`, `Pillow`, `einops`, `tensorboardX`, `matplotlib`, `seaborn`, `tqdm`, `python-dateutil` |
+| Adapters and profiling | `peft`, `transformers`; conditional `bitsandbytes`; optional `ptflops` |
+| Notebook analysis | `nibabel`, `scipy`, `pandas` |
+| Perceptual helper | `lucent` |
+| Unresolved references | `pytorch_ssim` and the absent local `dataset`, `conf`, and `models` modules |
+
+No versions are pinned; this table is an import inventory, not a tested installation specification.
+
+### Workflow represented by the snapshot
+
+```mermaid
+flowchart LR
+    A["Private 3D CT volumes and tumour labels<br/>(not included)"] --> B["Notebook preprocessing<br/>NIfTI to 2D PNG images and masks"]
+    B --> C["Dataset loader<br/>(referenced, not included)"]
+    C --> D["SAM-family backbone and base checkpoint<br/>(implementations and weights not included)"]
+    D --> E["Full tuning or adapter injection<br/>LoRA · QLoRA · Conv · RoSA · DiSCo"]
+    E --> F["Fold-based prompt-conditioned training"]
+    F --> G["Validation with point, box, or no-prompt modes"]
+    G --> H["IoU · Dice · HD95"]
+    H --> I["Checkpoints · CSV/JSON summaries · plots"]
+```
+
+> **Reproducibility boundary:** the diagram documents committed control flow, not a runnable recipe. Missing local modules, private data, base weights, absolute paths, and an unpinned environment prevent reproduction from a fresh clone.
+<!-- repository-guide:end -->
+
 ## Repository status
 
 > **Important:** this repository is an archival research snapshot. It is **not a standalone or turnkey implementation**, and it cannot reproduce the paper from a fresh clone.
