@@ -1,3 +1,7 @@
+<img width="100%" src="https://raw.githubusercontent.com/Ramtin-Mojtahedi/Ramtin-Mojtahedi/main/assets/project-sam.svg" alt="Foundation models: parameter-efficient SAM adaptation for liver CT segmentation.">
+
+[Research profile](https://github.com/Ramtin-Mojtahedi) · [Project directory](https://github.com/Ramtin-Mojtahedi/Ramtin-Mojtahedi/blob/main/REPOSITORY_INDEX.md) · [Paper](https://doi.org/10.1117/12.3087835)
+
 # Parameter-efficient fine-tuning of foundation models for liver tumor segmentation in CT
 
 [![DOI](https://img.shields.io/badge/DOI-10.1117%2F12.3087835-blue)](https://doi.org/10.1117/12.3087835)
